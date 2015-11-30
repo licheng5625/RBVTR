@@ -13,10 +13,10 @@
 #include <RBVTR/RBVTRPacket.h>
 #include "IPSocket.h"
 //#include "GPSR_m.h"
-#include"SeenTable.h"
+#include"RouteInterface/SeenTable.h"
 #include "RoadTable.h"
-#include "BroadcastWaitingTable.h"
-#include "DelayPacketTable.h"
+#include "RouteInterface/BroadcastWaitingTable.h"
+#include "RouteInterface/DelayPacketTable.h"
 #include "RTSPacketTable.h"
 
 
@@ -56,8 +56,7 @@ protected:
     std::vector<string> RSTSeenlist;
 
     RoadTable routingRoad;
-    DelayPacketTable delayPacketlist;
-    RTSPacketTable RTSlist;
+     RTSPacketTable RTSlist;
     IInterfaceTable *interfaceTable;
 
      void processSelfMessage(cMessage * message);

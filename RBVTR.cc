@@ -213,7 +213,7 @@ void RBVTR::processSelfMessage(cMessage * message)
         processRUTimer(nextRUtimer);
     else{
         RBVTRPacket* mypacket=NULL;
-        mypacket =packetwaitinglist.getRBVTRPacket(message);
+        mypacket =check_and_cast<RBVTRPacket *>(packetwaitinglist.getcPacket(message));
        if (mypacket!=NULL)
        {
            processRDTimer(message,mypacket,packetwaitinglist.getDataPacket(message));
