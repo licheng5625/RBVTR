@@ -643,7 +643,7 @@ void RBVTR::sendDataPacket(const IPvXAddress& target,std::vector<std::string> ro
 {
     RBVTR_EV << "Completing route discovery, originator " << getSelfIPAddress() << ", target " << target <<", nexthop: " <<nexthop<< endl;
 
-    std::multimap<IPvXAddress, IPv4Datagram *>::iterator lt = delayPacketlist.getlowbound(target);
+    std::multimap<IPvXAddress, IPv4Datagram *>::iterator lt = delayPacketlist.getlowerbound(target);
     std::multimap<IPvXAddress, IPv4Datagram *>::iterator ut = delayPacketlist.getupperbound(target);
     RBVTRPacket * rbvtrdataPacket;
     // reinject the delayed datagrams
