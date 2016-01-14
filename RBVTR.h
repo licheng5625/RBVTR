@@ -97,7 +97,6 @@ protected:
 
     void  clearMessage(cMessage * message,RBVTRPacket *rbvtrPacket);
     void sendDataPacket(const IPvXAddress& target,std::vector<std::string> roads,const IPvXAddress nexthop);
-    virtual void receiveChangeNotification(int category, const cObject *details);
 
 private:
 

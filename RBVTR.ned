@@ -43,7 +43,6 @@ simple RBVTR
 		double Tmax  @unit("s") = default(0.5s);
     	double dopt @unit("m") = default(400m); 
    		double dmax @unit("m") = default(800m); 
-
     	double a1 =default(0.2);
     	double a2 =default(1.2);
     	double a3 =default(0.03);
