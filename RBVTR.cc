@@ -143,30 +143,6 @@ if ( phase == 0 ) {
 
     return X*o;
 }
-void RBVTR::receiveChangeNotification(int category, const cObject *details)
-
-{
-    EV_LOG("RBVTR","receiveChangeNotification");
-    Enter_Method("receiveChangeNotification");
-    if (category == NF_LINK_FULL_PROMISCUOUS)
-
-      {
-
-          cPacket * pk = dynamic_cast<cPacket*>(  const_cast<cObject *>(details) );
-
-          if (pk)
-
-          {
-             Radio80211aControlInfo * cinfo = dynamic_cast<Radio80211aControlInfo*>(pk->getControlInfo());
-
-             if (cinfo)
-
-             {
-                recPow = cinfo->getRecPow();
-             }
-          }
-      }
-}
 void RBVTR::scheduleReBoardcastRDTimer(simtime_t holdingtime,RBVTRPacket *rbvtrPacket,IPv4Datagram * datagram)
 {
     EV_LOG("RBVTR", "Scheduling ReBoardcast timer" );
