@@ -16,24 +16,24 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#include "RBVTRGloblePositionTable.h"
+#include "RBVTRGlobalPositionTable.h"
 
 static double const NaN = 0.0 / 0.0;
 
-void RBVTRGloblePositionTable::setAddressToRoad(IPvXAddress address, std::string raod)
+void RBVTRGlobalPositionTable::setAddressToRoad(IPvXAddress address, std::string raod)
 {
     ASSERT(!address.isUnspecified());
     addressToRoad[address] = raod;
 }
-std::string RBVTRGloblePositionTable::getAddressToRoad(IPvXAddress address, std::string raod)
+std::string RBVTRGlobalPositionTable::getAddressToRoad(IPvXAddress address, std::string raod)
 {
     ASSERT(!address.isUnspecified());
     return addressToRoad[address];
 }
 
-void RBVTRGloblePositionTable::removePosition(const IPvXAddress & address)
+void RBVTRGlobalPositionTable::removePosition(const IPvXAddress & address)
 {
-   GloblePositionTable::removePosition(address);
+   GlobalPositionTable::removePosition(address);
    AddressToRoad::iterator it = addressToRoad.find(address);
    addressToRoad.erase(it);
 }

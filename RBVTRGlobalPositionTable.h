@@ -24,17 +24,17 @@
 #include "INETDefs.h"
 #include "IPvXAddress.h"
 #include "Coord.h"
-#include "../routeInterface/GloblePositionTable.h"
+#include "../routeInterface/GlobalPositionTable.h"
 /**
  * This class provides a mapping between node addresses and their positions.
  */
-class INET_API RBVTRGloblePositionTable:  public GloblePositionTable {
+class INET_API RBVTRGlobalPositionTable:  public GlobalPositionTable {
     private:
          typedef std::map<IPvXAddress, std::string> AddressToRoad;
          AddressToRoad addressToRoad;
 
     public:
-        RBVTRGloblePositionTable() { }
+         RBVTRGlobalPositionTable() { }
 
         std::string getAddressToRoad(IPvXAddress address, std::string raod);
 
