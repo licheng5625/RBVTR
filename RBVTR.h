@@ -58,6 +58,7 @@ protected:
     RoadTable routingRoad;
      RTSPacketTable RTSlist;
     IInterfaceTable *interfaceTable;
+    DelayPacketTable tempdelayPacketlist;
 
      void processSelfMessage(cMessage * message);
      void processMessage(cPacket * ctrlPacket,IPv4ControlInfo *udpProtocolCtrlInfo);
@@ -98,6 +99,7 @@ protected:
     void  clearMessage(cMessage * message,RBVTRPacket *rbvtrPacket);
     void sendDataPacket(const IPvXAddress& target,std::vector<std::string> roads,const IPvXAddress nexthop);
     void EV_LOG(std::string context);
+    void sendDataPacket(const IPvXAddress& target,std::vector<std::string> roads);
 
 private:
 

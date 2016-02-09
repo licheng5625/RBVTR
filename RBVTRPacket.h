@@ -37,7 +37,6 @@ class INET_API RBVTRPacket: public cPacket {
     RBVTRPacketType packetTpye_var;
     IPvXAddress src_ip;
     IPvXAddress des_ip;
-    IPvXAddress nexthop_ip;
 
     Coord src_position;
     Coord des_position;
@@ -54,6 +53,7 @@ public:
     virtual ~RBVTRPacket();
     virtual const RBVTRPacketType& getPacketType() const {return const_cast<RBVTRPacket*>(this)->packetTpye_var;}
     virtual void setRBVTRPacketType(const RBVTRPacketType& type){this->packetTpye_var=type;}
+    IPvXAddress nexthop_ip;
 
     RBVTRPacket& operator=(const RBVTRPacket& other);
    virtual RBVTRPacket *dup() const {return new RBVTRPacket(*this);}

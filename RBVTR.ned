@@ -41,7 +41,7 @@ simple RBVTR
 		double DATAliftime @unit("s") = default(20s); 
 		double nextRUtimer @unit("s") = default(5s); 
 		double Tmax  @unit("s") = default(0.5s);
-    	double dopt @unit("m") = default(400m); 
+    	double dopt @unit("m") = default(500m); 
    		double dmax @unit("m") = default(800m); 
     	double a1 =default(0.2);
     	double a2 =default(1.2);
