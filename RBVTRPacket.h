@@ -42,7 +42,6 @@ class INET_API RBVTRPacket: public cPacket {
     Coord des_position;
 
     unsigned int seqNum;
-    std::vector<std::string> roads;
     simtime_t lifeTime;
 
 
@@ -54,6 +53,8 @@ public:
     virtual const RBVTRPacketType& getPacketType() const {return const_cast<RBVTRPacket*>(this)->packetTpye_var;}
     virtual void setRBVTRPacketType(const RBVTRPacketType& type){this->packetTpye_var=type;}
     IPvXAddress nexthop_ip;
+    std::vector<std::string> roads;
+    std::vector<std::string> passedroads;
 
     RBVTRPacket& operator=(const RBVTRPacket& other);
    virtual RBVTRPacket *dup() const {return new RBVTRPacket(*this);}
@@ -81,8 +82,10 @@ public:
    virtual void setroads(std::vector<std::string> myroads);
    virtual int  getPacketlength();
    virtual void addroad(std::string road);
-
-       virtual std::string&  getroadsToStr();
+   virtual void setpassedroads(std::vector<std::string> myroads);
+   virtual std::vector<std::string>& getpassedroads();
+   virtual void addpassedroad(std::string road);
+   virtual std::string&  getroadsToStr();
 
 };
 inline void doPacking(cCommBuffer *b, RBVTRPacket& obj) {obj.parsimPack(b);}

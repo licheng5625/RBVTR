@@ -39,13 +39,14 @@ simple RBVTR
 	    double RUliftime @unit("s") = default(20s); 
 		double RRliftime @unit("s") = default(20s); 
 		double DATAliftime @unit("s") = default(20s); 
-		double nextRUtimer @unit("s") = default(5s); 
-		double Tmax  @unit("s") = default(0.5s);
-    	double dopt @unit("m") = default(500m); 
-   		double dmax @unit("m") = default(800m); 
-    	double a1 =default(0.2);
-    	double a2 =default(1.2);
+		double nextRUtimer @unit("s") = default(0.02s); 
+		double Tmax  @unit("s") = default(0.06s);
+    	double dopt @unit("m") = default(300m); 
+   		double dmax @unit("m") = default(400m); 
+    	double a1 =default(0.07);
+    	double a2 =default(0.5);
     	double a3 =default(0.03);
+    	int maxRebroadcastTime=default(10);
     gates:
         input ipIn;
         output ipOut;

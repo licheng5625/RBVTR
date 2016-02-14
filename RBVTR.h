@@ -26,12 +26,12 @@ class INET_API RBVTR:   public RouteInterface {
 public:
     RBVTR();
     virtual ~RBVTR();
-    typedef std::map<IPvXAddress, int> RDPacketSeenlist;
-
+    typedef std::map<std::string, int> RTSPacketRebroadcast;
+    RTSPacketRebroadcast rtsrebroadcastlist;
 protected:
 
     double HoldingIndex ;
-    double recPow;
+    //double recPow;
     simtime_t RDliftime;
     simtime_t RRliftime;
     simtime_t RUliftime;
@@ -42,7 +42,7 @@ protected:
     double Tmax;
     double dopt;
     double dmax;
-
+    int maxRebroadcastTime;
     double a1;
     double a2;
     double a3;
@@ -63,6 +63,7 @@ protected:
      void processSelfMessage(cMessage * message);
      void processMessage(cPacket * ctrlPacket,IPv4ControlInfo *udpProtocolCtrlInfo);
      void  processRUTimer(simtime_t timer);
+     void delRTSreBroadcast(string name);
 
      void initialize(int stage);
      void   test(RBVTRPacket* content);
@@ -88,8 +89,9 @@ protected:
     double   CaculateF(double distence);
     double   CaculateP(double distence);
     double  gaussrand(double o);
+    std::string getRoadID();
 
-    void  scheduleReBoardcastRDTimer(simtime_t holdingtime,RBVTRPacket *rbvtrPacket,IPv4Datagram * datagram);
+    void  scheduleReBroadcastRDTimer(simtime_t holdingtime,RBVTRPacket *rbvtrPacket,IPv4Datagram * datagram);
 
     //typedef std::map<cMessage *,IPvXAddress> AddressToSqum;
     PacketWaitingTable packetwaitinglist;

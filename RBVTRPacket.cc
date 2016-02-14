@@ -30,6 +30,8 @@ Register_Class(RBVTRPacket);
 
 RBVTRPacket::RBVTRPacket(const char *name, int kind) : ::cPacket(name,kind)
 {   roads=std::vector<std::string>();
+    passedroads=std::vector<std::string>();
+
     // TODO Auto-generated constructor stub
 
 }
@@ -60,7 +62,7 @@ RBVTRPacket& RBVTRPacket::operator=(const RBVTRPacket& other)
 
 void RBVTRPacket::copy(const RBVTRPacket& other)
 {
-    this->packetTpye_var= other.packetTpye_var;
+     this->packetTpye_var= other.packetTpye_var;
      this->src_ip= other.src_ip;
      this->des_ip= other.des_ip;
      this->nexthop_ip= other.nexthop_ip;
@@ -68,6 +70,7 @@ void RBVTRPacket::copy(const RBVTRPacket& other)
      this->des_position= other.des_position;
      this->seqNum= other.seqNum;
      this->roads= other.roads;
+     this->passedroads= other.passedroads;
      this->lifeTime=other.lifeTime;
 }
 
@@ -82,6 +85,7 @@ void RBVTRPacket::parsimPack(cCommBuffer *b)
     doPacking(b,this->des_position);
     doPacking(b,this->seqNum);
     doPacking(b,this->roads);
+    doPacking(b,this->passedroads);
     doPacking(b,this->lifeTime);
 }
 
@@ -96,6 +100,7 @@ void RBVTRPacket::parsimUnpack(cCommBuffer *b)
     doUnpacking(b,this->des_position);
     doUnpacking(b,this->seqNum);
     doUnpacking(b,this->roads);
+    doUnpacking(b,this->passedroads);
     doUnpacking(b,this->lifeTime);
 }
 
@@ -170,6 +175,17 @@ std::vector<std::string>& RBVTRPacket::getroads(){
 }
 void RBVTRPacket::addroad(std::string road){
     return roads.push_back(road);
+}
+void RBVTRPacket::setpassedroads(std::vector<std::string> myroads)
+{
+    passedroads=myroads;
+}
+
+std::vector<std::string>& RBVTRPacket::getpassedroads(){
+    return passedroads;
+}
+void RBVTRPacket::addpassedroad(std::string road){
+    return passedroads.push_back(road);
 }
 std::string& RBVTRPacket::getroadsToStr(){
     std::string ret="";
