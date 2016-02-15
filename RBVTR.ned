@@ -34,7 +34,6 @@ simple RBVTR
        string routingTableModule = default("^.routingTable");
       
         string interfaces = default("*");
-		double HoldingIndex  =default(1);
 		double RDliftime @unit("s") = default(20s); 
 	    double RUliftime @unit("s") = default(20s); 
 		double RRliftime @unit("s") = default(20s); 

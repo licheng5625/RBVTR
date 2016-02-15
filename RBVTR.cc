@@ -37,7 +37,6 @@ void RBVTR::initialize( int stage){
         squmDATA=0;
         squmRTS=0;
 
-        HoldingIndex = par("HoldingIndex");
 
         RDliftime= par("RDliftime");
         RRliftime= par("RRliftime");
@@ -554,7 +553,7 @@ void RBVTR::processRTSPACKET(RBVTRPacket * rbvtrPacket)
                {
                   LOG_EV<<"passroad: "<<passroad[i]<<endl;
                }
-              if(distence>0)//||(std::find(passroad.begin(),passroad.end(),getRoadID())==passroad.end()))
+              if(distence>0||(std::find(passroad.begin(),passroad.end(),getRoadID())==passroad.end()))
               {
                   LOG_EV<<"i got Rts from "<<globalPositionTable.getHostName(rbvtrPacket->getsrcAddress());
                 RBVTR_EV<<"got RTS IP:"<<rbvtrPacket->getsrcAddress()<<"  SQUM: "<<rbvtrPacket->getSeqnum()<<endl;
@@ -813,6 +812,12 @@ INetfilter::IHook::Result RBVTR::datagramLocalOutHook(IPv4Datagram * datagram, c
              return ACCEPT;
          else {
              EV_LOG("i am here 2"+std::string(datagram->getName()));
+             if(std::string(datagram->getName()).find("ICMP")!=std::string::npos)
+             {
+                 cout << "got "<<datagram->getName() <<endl;
+                 LOG_EV << "got "<<datagram->getName() <<endl;
+                 return DROP;
+             }
              if (dynamic_cast<RBVTRPacket *>((dynamic_cast<cPacket *>(datagram))->getEncapsulatedPacket()))//||dynamic_cast<RBVTRPacket *>( (dynamic_cast<UDPPacket *>((dynamic_cast<cPacket *>(datagram))->getEncapsulatedPacket()))->getEncapsulatedPacket()))
                           {
                               EV_LOG("i am here 3"+std::string(datagram->getName()));
