@@ -517,6 +517,7 @@ void RBVTR::processRRPACKET(RBVTRPacket * rbvtrPacket)
     if(rbvtrPacket->getdesAddress()==getSelfIPAddress())
          {
             EV_LOG("I got a RR");
+            LOG_EV<<"i got RR from "<<globalPositionTable.getHostName(rbvtrPacket->getsrcAddress())<<endl;
             RBVTR_EV <<(rbvtrPacket->getdesAddress())<<"           "<<getSelfIPAddress()<<endl;
             if(routingRoad.addRoadTable(rbvtrPacket->getsrcAddress(),rbvtrPacket->getroads(),rbvtrPacket->getscrPosition()))
             {
@@ -706,7 +707,7 @@ void RBVTR::processCTSPACKET(RBVTRPacket * rbvtrPacket)
 
 void RBVTR::delRTSreBroadcast(string name)
 {
-    std::string packetname=name.replace(name.begin(),name.begin()+1,"R");
+    std::string packetname=name.replace(name.begin(),name.begin()+4,"");
     packetname="RE_"+packetname;
     cMessage *mymsg=NULL;
     mymsg=packetwaitinglist.findPacket(packetname);
@@ -721,13 +722,13 @@ void RBVTR::delRTSreBroadcast(string name)
      }
      else
      {
-       /*  std::vector<cPacket*>queuerts= packetwaitinglist.getAllcPackets();
+         std::vector<cPacket*>queuerts= packetwaitinglist.getAllcPackets();
 
          LOG_EV<<"can't find RE "<<packetname<<" num: "<<queuerts.size()<<endl;
          for(int i=0;i<queuerts.size();i++)
          {
              LOG_EV<<queuerts[i]->getName()<<endl;
-         }*/
+         }
      }
    }
 
