@@ -23,7 +23,8 @@ enum RBVTRPacketType {
     RBVTR_RR,
     RBVTR_CTS,
     RBVTR_RTS,
-    RBVTR_RU
+    RBVTR_RU,
+    RBVTR_RE
 };
 
 

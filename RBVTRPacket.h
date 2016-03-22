@@ -39,6 +39,8 @@ class INET_API RBVTRPacket: public cPacket {
     IPvXAddress des_ip;
 
     Coord src_position;
+    Coord sender_position;
+
     Coord des_position;
 
     unsigned int seqNum;
@@ -64,6 +66,8 @@ public:
    virtual IPvXAddress&  getsrcAddress();
    void setsrcAddress(const IPvXAddress& address);
    virtual IPvXAddress& getdesAddress();
+   virtual Coord& getsenderPosition();
+   virtual void setsenderPosition(const Coord& address);
    virtual void setdesAddress(const IPvXAddress& address);
    virtual IPvXAddress& getnexthopAddress();
    virtual void setnexthopAddress(const IPvXAddress& address);

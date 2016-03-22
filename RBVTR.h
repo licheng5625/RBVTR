@@ -18,6 +18,7 @@
 #include "routeInterface/BroadcastWaitingTable.h"
 #include "routeInterface/DelayPacketTable.h"
 #include "RTSPacketTable.h"
+#include <queue>          // std::queue
 
 
 #include <algorithm>
@@ -36,8 +37,10 @@ protected:
     simtime_t RRliftime;
     simtime_t RUliftime;
     simtime_t DATAliftime;
+    simtime_t REwaittime;
     simtime_t nextRUtimer;
     cMessage * RUTimer;
+    cMessage * RETimer;
 
     double Tmax;
     double dopt;
@@ -54,6 +57,7 @@ protected:
     SeenTable DATASeenlist;
 
     std::vector<string> RSTSeenlist;
+    std::queue<std::pair<IPvXAddress ,simtime_t>  >  Queuedeslist;
 
     RoadTable routingRoad;
      RTSPacketTable RTSlist;
@@ -62,7 +66,9 @@ protected:
 
      void processSelfMessage(cMessage * message);
      void processMessage(cPacket * ctrlPacket,IPv4ControlInfo *udpProtocolCtrlInfo);
-     void  processRUTimer(simtime_t timer);
+     void processRUTimer(simtime_t timer);
+     void processRETimer();
+
      void delRTSreBroadcast(string name);
 
      void initialize(int stage);
@@ -73,12 +79,14 @@ protected:
      RBVTRPacket *createRUPacket(IPvXAddress destination,  std::vector<std::string>roads);
      RBVTRPacket *createRTSPacket(RBVTRPacket *rbvtrPacket);
      RBVTRPacket *createCTSPacket(RBVTRPacket *rbvtrPacket);
+     RBVTRPacket *createREPacket(RBVTRPacket *rbvtrPacket);
 
      void  processRTSPACKET(RBVTRPacket * rbvtrPacket);
      void  processCTSPACKET(RBVTRPacket * rbvtrPacket);
      void  processRDPACKET(RBVTRPacket * rbvtrPacket);
      void  processRUPACKET(RBVTRPacket * rbvtrPacket);
      void  processRRPACKET(RBVTRPacket * rbvtrPacket);
+     void  processREPACKET(RBVTRPacket * rbvtrPacket);
 
      void  BroadcastRTS(RBVTRPacket * rbvtrPacket);
 
@@ -92,6 +100,7 @@ protected:
     std::string getRoadID();
 
     void  scheduleReBroadcastRDTimer(simtime_t holdingtime,RBVTRPacket *rbvtrPacket,IPv4Datagram * datagram);
+    void scheduleRErunoutTimer(simtime_t holdingtime);
 
     //typedef std::map<cMessage *,IPvXAddress> AddressToSqum;
     PacketWaitingTable packetwaitinglist;
@@ -114,6 +123,7 @@ private:
     int squmRD;
     int squmRR;
     int squmRU;
+    int squmRE;
     int squmRTS;
     int squmDATA;
 

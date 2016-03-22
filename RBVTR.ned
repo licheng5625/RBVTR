@@ -37,6 +37,7 @@ simple RBVTR
 		double RDliftime @unit("s") = default(20s); 
 	    double RUliftime @unit("s") = default(20s); 
 		double RRliftime @unit("s") = default(20s); 
+		double REwaittime @unit("s") = default(2s); 
 		double DATAliftime @unit("s") = default(20s); 
 		double nextRUtimer @unit("s") = default(0.02s); 
 		double Tmax  @unit("s") = default(0.06s);

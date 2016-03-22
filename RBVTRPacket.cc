@@ -67,6 +67,7 @@ void RBVTRPacket::copy(const RBVTRPacket& other)
      this->des_ip= other.des_ip;
      this->nexthop_ip= other.nexthop_ip;
      this->src_position= other.src_position;
+     this->sender_position= other.sender_position;
      this->des_position= other.des_position;
      this->seqNum= other.seqNum;
      this->roads= other.roads;
@@ -82,6 +83,7 @@ void RBVTRPacket::parsimPack(cCommBuffer *b)
     doPacking(b,this->des_ip);
     doPacking(b,this->nexthop_ip);
     doPacking(b,this->src_position);
+    doPacking(b,this->sender_position);
     doPacking(b,this->des_position);
     doPacking(b,this->seqNum);
     doPacking(b,this->roads);
@@ -98,6 +100,7 @@ void RBVTRPacket::parsimUnpack(cCommBuffer *b)
     doUnpacking(b,this->nexthop_ip);
     doUnpacking(b,this->src_position);
     doUnpacking(b,this->des_position);
+    doUnpacking(b,this->sender_position);
     doUnpacking(b,this->seqNum);
     doUnpacking(b,this->roads);
     doUnpacking(b,this->passedroads);
@@ -140,6 +143,18 @@ Coord& RBVTRPacket::getscrPosition()
 Coord& RBVTRPacket::getdesPosition()
 {
     return des_position;
+}
+
+
+
+Coord& RBVTRPacket::getsenderPosition()
+{
+    return sender_position;
+}
+
+void RBVTRPacket::setsenderPosition(const Coord& address)
+{
+    this->sender_position = address;
 }
 int RBVTRPacket::getPacketlength()
 {
