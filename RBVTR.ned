@@ -40,13 +40,13 @@ simple RBVTR
 		double REwaittime @unit("s") = default(2s); 
 		double DATAliftime @unit("s") = default(20s); 
 		double nextRUtimer @unit("s") = default(0.02s); 
-		double Tmax  @unit("s") = default(0.06s);
+		double Tmax  @unit("s") = default(0.1s);
     	double dopt @unit("m") = default(300m); 
    		double dmax @unit("m") = default(400m); 
     	double a1 =default(0.07);
     	double a2 =default(0.5);
     	double a3 =default(0.03);
-    	string logpath =default(expand( "/Applications/omnetpp-4.5/samples/inetmanet-2.0/src/networklayer/routing/RBVTR/log.txt"));
+    	int section =default(1);
     	int maxRebroadcastTime=default(10);
     gates:
         input ipIn;

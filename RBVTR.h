@@ -33,7 +33,7 @@ public:
 protected:
 
     double HoldingIndex ;
-    //double recPow;
+    int  section;
     simtime_t RDliftime;
     simtime_t RRliftime;
     simtime_t RUliftime;

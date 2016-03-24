@@ -37,7 +37,7 @@ void RBVTR::initialize( int stage){
         squmDATA=0;
         squmRTS=0;
         squmRE=0;
-
+        section = par("section");
         RDliftime= par("RDliftime");
         RRliftime= par("RRliftime");
         DATAliftime= par("DATAliftime");
@@ -619,23 +619,19 @@ void RBVTR::processRTSPACKET(RBVTRPacket * rbvtrPacket)
                 scheduleReBroadcastRDTimer(CaculateHoldTime(ctspacket->getscrPosition(),ctspacket->getdesPosition()),ctspacket,NULL);
               }else
               {
-                  LOG_EV<<"i drop Rts from "<<globalPositionTable.getHostName(rbvtrPacket->getsrcAddress())<<" with distence : "<<distence<<endl;
+                  LOG_EV<<"i drop Rts from "<<globalPositionTable.getHostName(rbvtrPacket->getsrcAddress())<<" in the passed road"<<endl;
               }
               //  RSTSeenlist.push_back(name);
           }else
           {
               EV_LOG("SEEN this RTS: "+name);
-              if(RouteInterface::getRoadID().length()==3&&hasIntersection(getRoadID(),RouteInterface::getRoadID()))
+              if(RouteInterface::getRoadID().length()==3&&hasIntersection(getRoadID(),RouteInterface::getRoadID())&&section>0)
               {
-                  for(int i=1;i<routingroad.size()-1;i++)
-                  {
-                      if(routingroad[i].find(RouteInterface::getRoadID())!=std::string::npos)
-                      {
-                          LOG_EV<<"i got Rts from "<<globalPositionTable.getHostName(rbvtrPacket->getsrcAddress())<<" with distence : "<<distence<<" my road: "<<RouteInterface::getRoadID()<<endl;
-                          RBVTRPacket *ctspacket=  createCTSPacket( rbvtrPacket);
-                          scheduleReBroadcastRDTimer(CaculateHoldTime(ctspacket->getsenderPosition(),ctspacket->getdesPosition()),ctspacket,NULL);
-                          return;
-                      }
+                  LOG_EV<<"i got Rts from "<<globalPositionTable.getHostName(rbvtrPacket->getsrcAddress())<<" with distence : "<<distence<<" my road: "<<RouteInterface::getRoadID()<<endl;
+                  RBVTRPacket *ctspacket=  createCTSPacket( rbvtrPacket);
+                  scheduleReBroadcastRDTimer(CaculateHoldTime(ctspacket->getsenderPosition(),ctspacket->getdesPosition()),ctspacket,NULL);
+                  return;
+
                   }
                   LOG_EV<<"i drop Rts from "<<globalPositionTable.getHostName(rbvtrPacket->getsrcAddress())<<" with distence : "<<distence<<" my road: "<<RouteInterface::getRoadID()<<endl;
 
@@ -664,7 +660,7 @@ void RBVTR::processRTSPACKET(RBVTRPacket * rbvtrPacket)
                                   }
                               }*/
 
-                  }
+
           }
    // }
  /*   else
@@ -720,13 +716,13 @@ void RBVTR::delRTSreBroadcast(string name)
      }
      else
      {
-         std::vector<cPacket*>queuerts= packetwaitinglist.getAllcPackets();
+       /*  std::vector<cPacket*>queuerts= packetwaitinglist.getAllcPackets();
 
          LOG_EV<<"can't find RE "<<packetname<<" num: "<<queuerts.size()<<endl;
          for(int i=0;i<queuerts.size();i++)
          {
              LOG_EV<<queuerts[i]->getName()<<endl;
-         }
+         }*/
      }
    }
 
