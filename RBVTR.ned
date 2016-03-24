@@ -46,6 +46,7 @@ simple RBVTR
     	double a1 =default(0.07);
     	double a2 =default(0.5);
     	double a3 =default(0.03);
+    	string logpath =default(expand( "/Applications/omnetpp-4.5/samples/inetmanet-2.0/src/networklayer/routing/RBVTR/log.txt"));
     	int maxRebroadcastTime=default(10);
     gates:
         input ipIn;

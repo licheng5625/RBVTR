@@ -29,6 +29,7 @@ public:
     virtual ~RBVTR();
     typedef std::map<std::string, int> RTSPacketRebroadcast;
     RTSPacketRebroadcast rtsrebroadcastlist;
+    static string logpath;
 protected:
 
     double HoldingIndex ;

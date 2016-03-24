@@ -40,7 +40,6 @@ class INET_API RBVTRPacket: public cPacket {
 
     Coord src_position;
     Coord sender_position;
-
     Coord des_position;
 
     unsigned int seqNum;
@@ -57,6 +56,7 @@ public:
     IPvXAddress nexthop_ip;
     std::vector<std::string> roads;
     std::vector<std::string> passedroads;
+    std::string  currentroad;
 
     RBVTRPacket& operator=(const RBVTRPacket& other);
    virtual RBVTRPacket *dup() const {return new RBVTRPacket(*this);}
@@ -80,7 +80,8 @@ public:
    virtual simtime_t &  getLifetime();
    virtual void  setLifetime(simtime_t mylifetime);
 
-
+   virtual std::string  getcurrentroad();
+   virtual void setcurrentroad( std::string currentroad);
    virtual unsigned int& getSeqnum();
    virtual std::vector<std::string>& getroads();
    virtual void setroads(std::vector<std::string> myroads);

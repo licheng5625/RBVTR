@@ -65,6 +65,7 @@ void RBVTRPacket::copy(const RBVTRPacket& other)
      this->packetTpye_var= other.packetTpye_var;
      this->src_ip= other.src_ip;
      this->des_ip= other.des_ip;
+     this->currentroad= other.currentroad;
      this->nexthop_ip= other.nexthop_ip;
      this->src_position= other.src_position;
      this->sender_position= other.sender_position;
@@ -79,6 +80,7 @@ void RBVTRPacket::parsimPack(cCommBuffer *b)
 {
     ::cPacket::parsimPack(b);
     doPacking(b,this->packetTpye_var);
+    doPacking(b,this->currentroad);
     doPacking(b,this->src_ip);
     doPacking(b,this->des_ip);
     doPacking(b,this->nexthop_ip);
@@ -94,6 +96,7 @@ void RBVTRPacket::parsimPack(cCommBuffer *b)
 void RBVTRPacket::parsimUnpack(cCommBuffer *b)
 {
     ::cPacket::parsimUnpack(b);
+    doUnpacking(b,this->currentroad);
     doUnpacking(b,this->packetTpye_var);
     doUnpacking(b,this->src_ip);
     doUnpacking(b,this->des_ip);
@@ -107,6 +110,15 @@ void RBVTRPacket::parsimUnpack(cCommBuffer *b)
     doUnpacking(b,this->lifeTime);
 }
 
+std::string RBVTRPacket::getcurrentroad()
+{
+    return currentroad;
+}
+
+void RBVTRPacket::setcurrentroad(std::string currentroad)
+{
+    this->currentroad = currentroad;
+}
 IPvXAddress& RBVTRPacket::getsrcAddress()
 {
     return src_ip;
