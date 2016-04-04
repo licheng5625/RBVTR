@@ -35,6 +35,7 @@ class INET_API RBVTRPacket: public cPacket {
 
   protected:
     RBVTRPacketType packetTpye_var;
+    RBVTRPacketType RTSpacketTpye_var;
     IPvXAddress src_ip;
     IPvXAddress des_ip;
 
@@ -53,6 +54,8 @@ public:
     virtual ~RBVTRPacket();
     virtual const RBVTRPacketType& getPacketType() const {return const_cast<RBVTRPacket*>(this)->packetTpye_var;}
     virtual void setRBVTRPacketType(const RBVTRPacketType& type){this->packetTpye_var=type;}
+    RBVTRPacketType getRTSPacketType();
+    void  setRTSRBVTRPacketType(RBVTRPacketType type);
     IPvXAddress nexthop_ip;
     std::vector<std::string> roads;
     std::vector<std::string> passedroads;

@@ -109,9 +109,10 @@ protected:
     void  processRDTimer(cMessage * message,RBVTRPacket *rbvtrPacket,const IPv4Datagram * pakcet);
 
     void  clearMessage(cMessage * message,RBVTRPacket *rbvtrPacket);
-    void sendDataPacket(const IPvXAddress& target,std::vector<std::string> roads,const IPvXAddress nexthop);
+    void sendDataPacket(const IPvXAddress& target,std::vector<std::string> roads,const IPvXAddress nexthop,RBVTRPacketType packettype);
     void EV_LOG(std::string context);
     void sendDataPacket(const IPvXAddress& target,std::vector<std::string> roads);
+    std::string TypeToString(RBVTRPacketType type);
 
 private:
 

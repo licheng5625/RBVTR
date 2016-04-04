@@ -359,24 +359,24 @@ void RBVTR::processRDPACKET(RBVTRPacket * rbvtrPacket)
               {
                  for(int i=0;i<roads.size()-1;i++)
                  {
-                  std::string intersection =getRoadIntersection(roads[i],roads[i+1]);
-                  if(intersection==std::string("none"))
-                  {
-                    std::string newroad=  caculateConnection(roads[i],roads[i+1]);
-                    if(newroad==std::string("none"))
-                        return;
-                    //std::string oldroad =temproad[rbvtrPacket->roads.size()-1];
-                    //rbvtrPacket->roads[rbvtrPacket->roads.size()-1]=newroad;
-                    //rbvtrPacket->roads.push_back(oldroad);
-                    //LOG_EV<<"old "<<roads[i]<<" "<<roads[i+1]<<" add "<<newroad<<endl;
-                    temproad.push_back(roads[i]);
-                    temproad.push_back(newroad);
-                  }
-                  else
-                  {
-                     // LOG_EV<<"old "<<roads[i]<<" "<<roads[i+1]<<" the intersection  "<<intersection<<endl;
-                      temproad.push_back(roads[i]);
-                  }
+                      std::string intersection =getRoadIntersection(roads[i],roads[i+1]);
+                      if(intersection==std::string("none"))
+                      {
+                        std::string newroad=  caculateConnection(roads[i],roads[i+1]);
+                        if(newroad==std::string("none"))
+                            return;
+                        //std::string oldroad =temproad[rbvtrPacket->roads.size()-1];
+                        //rbvtrPacket->roads[rbvtrPacket->roads.size()-1]=newroad;
+                        //rbvtrPacket->roads.push_back(oldroad);
+                        //LOG_EV<<"old "<<roads[i]<<" "<<roads[i+1]<<" add "<<newroad<<endl;
+                        temproad.push_back(roads[i]);
+                        temproad.push_back(newroad);
+                      }
+                      else
+                      {
+                         // LOG_EV<<"old "<<roads[i]<<" "<<roads[i+1]<<" the intersection  "<<intersection<<endl;
+                          temproad.push_back(roads[i]);
+                      }
                  }
                  temproad.push_back(roads[roads.size()-1]);
                  roads=temproad;
@@ -407,7 +407,7 @@ void RBVTR::processRDPACKET(RBVTRPacket * rbvtrPacket)
               }
              else
               {
-                 temproad.push_back(getRoadID());
+                 temproad=rbvtrPacket->roads;
               }
 
 
@@ -613,7 +613,7 @@ void RBVTR::processRTSPACKET(RBVTRPacket * rbvtrPacket)
                }
               if(std::find(passroad.begin(),passroad.end(),getRoadID())==passroad.end())
               {
-                LOG_EV<<"i got Rts from "<<globalPositionTable.getHostName(rbvtrPacket->getsrcAddress());
+                LOG_EV<<"i got Rts from "<<globalPositionTable.getHostName(rbvtrPacket->getsrcAddress())<<" in the road: "<<getRoadID();
                 RBVTR_EV<<"got RTS IP:"<<rbvtrPacket->getsrcAddress()<<"  SQUM: "<<rbvtrPacket->getSeqnum()<<endl;
                 RBVTRPacket *ctspacket=  createCTSPacket( rbvtrPacket);
                 scheduleReBroadcastRDTimer(CaculateHoldTime(ctspacket->getscrPosition(),ctspacket->getdesPosition()),ctspacket,NULL);
@@ -624,15 +624,39 @@ void RBVTR::processRTSPACKET(RBVTRPacket * rbvtrPacket)
               //  RSTSeenlist.push_back(name);
           }else
           {
-              EV_LOG("SEEN this RTS: "+name);
-              if(RouteInterface::getRoadID().length()==3&&hasIntersection(getRoadID(),RouteInterface::getRoadID())&&section>0)
+            /*  if((std::find(routingroad.begin(),routingroad.end(),getRoadID())==routingroad.end()))
               {
-                  LOG_EV<<"i got Rts from "<<globalPositionTable.getHostName(rbvtrPacket->getsrcAddress())<<" with distence : "<<distence<<" my road: "<<RouteInterface::getRoadID()<<endl;
-                  RBVTRPacket *ctspacket=  createCTSPacket( rbvtrPacket);
-                  scheduleReBroadcastRDTimer(CaculateHoldTime(ctspacket->getsenderPosition(),ctspacket->getdesPosition()),ctspacket,NULL);
-                  return;
+                  RBVTR_EV<<"i am not in road list: "<<getRoadID()<<endl;
+                  LOG_EV<<"i am not in road list: "<<getRoadID()<<endl;
+                  for(int i=0;i<routingroad.size();i++)
+                        {
+                              RBVTR_EV<<"routingroad: "<<routingroad[i]<<endl;
+                              LOG_EV<<"routingroad: "<<routingroad[i]<<endl;
+                        }
+              }
+              if(std::find(RSTSeenlist.begin(),RSTSeenlist.end(),(name))!=RSTSeenlist.end())
+              {
+                  EV_LOG("SEEN this RTS: "+name);
+                  LOG_EV<<"SEEN this RTS:: "<<name<<endl;
+              }*/
 
-                  }
+              if(std::find(RSTSeenlist.begin(),RSTSeenlist.end(),(name))==RSTSeenlist.end())
+              {
+              if(RouteInterface::getRoadID().length()==3&&hasIntersection(rbvtrPacket->getcurrentroad(),RouteInterface::getRoadID())&&section>0)
+              {
+                      LOG_EV<<"i got Rts from "<<globalPositionTable.getHostName(rbvtrPacket->getsrcAddress())<<" my road: "<<RouteInterface::getRoadID()<<endl;
+                      RBVTRPacket *ctspacket=  createCTSPacket( rbvtrPacket);
+                      scheduleReBroadcastRDTimer(CaculateHoldTime(ctspacket->getsenderPosition(),ctspacket->getdesPosition()),ctspacket,NULL);
+                      return;
+                      }
+                      if(getRoadIntersection(getRoadID(),rbvtrPacket->getcurrentroad())!="none"&&section>1)
+                          {
+                           LOG_EV<<"i got Rts from "<<globalPositionTable.getHostName(rbvtrPacket->getsrcAddress())<<" in other road: "<<RouteInterface::getRoadID()<<endl;
+                           RBVTRPacket *ctspacket=  createCTSPacket( rbvtrPacket);
+                           scheduleReBroadcastRDTimer(Tmax+0.1,ctspacket,NULL);
+                           return;
+                           }
+              }
                   LOG_EV<<"i drop Rts from "<<globalPositionTable.getHostName(rbvtrPacket->getsrcAddress())<<" with distence : "<<distence<<" my road: "<<RouteInterface::getRoadID()<<endl;
 
                         /* std::vector<std::string> verticalroad;
@@ -695,7 +719,7 @@ void RBVTR::processCTSPACKET(RBVTRPacket * rbvtrPacket)
         RBVTR_EV<<"i got CTS from "<<globalPositionTable.getHostName(rbvtrPacket->getsrcAddress())<<endl;
         RBVTR_EV<<"send packets IP:"<<rbvtrPacket->getsrcAddress()<<"  SQUM: "<<rbvtrPacket->getSeqnum()<<endl;
         delRTSreBroadcast(rbvtrPacket->getName());
-        sendDataPacket((rbvtrPacket->getnexthopAddress()),rbvtrPacket->getroads(),rbvtrPacket->getsrcAddress());
+        sendDataPacket((rbvtrPacket->getnexthopAddress()),rbvtrPacket->getroads(),rbvtrPacket->getsrcAddress(),rbvtrPacket->getRTSPacketType());
       }
 }
 
@@ -708,7 +732,7 @@ void RBVTR::delRTSreBroadcast(string name)
     //RSTSeenlist.push_back(name.substr(3));
      if(mymsg!=NULL)
      {
-         LOG_EV<<"dele RE "<<packetname<<endl;
+         //LOG_EV<<"dele RE "<<packetname<<endl;
       clearMessage(mymsg,NULL);
       //LOG_EV<<"cancel RTS from "<<mymsg->getName()<<endl;
 
@@ -761,6 +785,7 @@ void RBVTR::processMessage(cPacket * ctrlPacket,IPv4ControlInfo *udpProtocolCtrl
                processRUPACKET(rbvtrPacket);
                break;
      default :
+         std::cout<<rbvtrPacket->getPacketType()<<endl;
          throw cRuntimeError("Unknown packet type");
     }
 
@@ -789,6 +814,8 @@ INetfilter::IHook::Result RBVTR::datagramPostRoutingHook(IPv4Datagram * datagram
     EV_LOG("datagramPostRoutingHook");
     const IPv4Address & destination = datagram->getDestAddress();
 
+
+
     if (destination.isMulticast() || destination.isLimitedBroadcastAddress()|| routingTable->isLocalAddress(destination))
                return ACCEPT;
     else{
@@ -799,11 +826,19 @@ INetfilter::IHook::Result RBVTR::datagramPostRoutingHook(IPv4Datagram * datagram
                 {
                    BroadcastRTS(rbvtrPacket);
                    tempdelayPacketlist.addPacket(destination,datagram);
-                   //delayPacketlist.addPacket
+                   if(getHostName()=="host[38]"||getHostName()=="host[190]")
+                     {
+                         LOG_EV <<" QUEUED nexthopis UNSPECIFIED_ADDRESS"<<endl;
+                     }
+
                    return QUEUE;
                 }else
                 {
                     nextHop=rbvtrPacket->nexthop_ip.get4();
+                    if(getHostName()=="host[38]"||getHostName()=="host[190]")
+                       {
+                           LOG_EV <<" sent nexthop is "<<nextHop<<endl;
+                       }
                     return ACCEPT;
                 }
         }
@@ -813,6 +848,10 @@ INetfilter::IHook::Result RBVTR::datagramPostRoutingHook(IPv4Datagram * datagram
            // RBVTR_EV << "RBVTR   " << rbvtrPacket->getPacketType()<<RBVTR_POST<< endl;
 
             nextHop=rbvtrPacket->nexthop_ip.get4();
+            if(getHostName()=="host[38]"||getHostName()=="host[190]")
+               {
+                   LOG_EV <<" sent nexthop is "<<nextHop<<endl;
+               }
         }else{
         //  cPacket * networkPacket = dynamic_cast<cPacket *>(datagram);
          // RBVTRPacket * rbvtrPacket = dynamic_cast<RBVTRPacket *>(networkPacket->getEncapsulatedPacket());
@@ -820,6 +859,10 @@ INetfilter::IHook::Result RBVTR::datagramPostRoutingHook(IPv4Datagram * datagram
          // RBVTRPacket * rbvtrdataPacket = createDataPacket(datagram->getDestAddress(), networkPacket->decapsulate());
         //  networkPacket->encapsulate(rbvtrdataPacket);
         // DATASeenlist.SeePacket(rbvtrdataPacket->getsrcAddress(), rbvtrdataPacket->getSeqnum());
+            if(getHostName()=="host[38]"||getHostName()=="host[190]")
+                         {
+                             LOG_EV <<" sent nexthop is ALLONES_ADDRESS"<<endl;
+                         }
          nextHop=IPv4Address::ALLONES_ADDRESS;
         }
     }
@@ -837,6 +880,18 @@ INetfilter::IHook::Result RBVTR::datagramForwardHook(IPv4Datagram * datagram, co
         EV_LOG("YES RBVTRPacket");
            RBVTRPacket * rbvtrPacket = check_and_cast<RBVTRPacket *>( (dynamic_cast<cPacket *>(datagram))->getEncapsulatedPacket());
            RBVTR_EV << "RBVTR   " <<rbvtrPacket->getFullName()<<"   "<< rbvtrPacket->getPacketType()<<RBVTR_DATA<< endl;
+           if(std::find(rbvtrPacket->getroads().begin(),rbvtrPacket->getroads().end(),getRoadID())!=rbvtrPacket->getroads().end()||RouteInterface::getRoadID().length()==3)
+                {
+                    if(rbvtrPacket->getcurrentroad()!=getRoadID())
+                    {
+                        std::vector<std::string> passroad=rbvtrPacket->passedroads;
+                        if(std::find(passroad.begin(),passroad.end(),rbvtrPacket->getcurrentroad())==passroad.end())
+                         {
+                             rbvtrPacket->passedroads.push_back(rbvtrPacket->getcurrentroad());
+                         }
+                        rbvtrPacket->setcurrentroad(getRoadID());
+                    }
+                }
            BroadcastRTS(rbvtrPacket);
            delayPacketlist.addPacket(destination,datagram);
            return QUEUE;
@@ -846,16 +901,19 @@ INetfilter::IHook::Result RBVTR::datagramForwardHook(IPv4Datagram * datagram, co
                 EV_LOG("YES RBVTRPacket");
                  RBVTRPacket * rbvtrPacket = check_and_cast<RBVTRPacket *>( (dynamic_cast<UDPPacket *>((dynamic_cast<cPacket *>(datagram))->getEncapsulatedPacket()))->getEncapsulatedPacket());
                  RBVTR_EV << "RBVTR   " <<rbvtrPacket->getFullName()<<"   "<< rbvtrPacket->getPacketType()<<RBVTR_DATA<< endl;
-                 if(rbvtrPacket->getcurrentroad()!=getRoadID())
-                 {
-                     std::vector<std::string> passroad=rbvtrPacket->passedroads;
-                     if(std::find(passroad.begin(),passroad.end(),rbvtrPacket->getcurrentroad())==passroad.end())
-                      {
-                          rbvtrPacket->passedroads.push_back(rbvtrPacket->getcurrentroad());
-                      }
-                     rbvtrPacket->setcurrentroad(getRoadID());
-                 }
 
+                 if(std::find(rbvtrPacket->getroads().begin(),rbvtrPacket->getroads().end(),getRoadID())!=rbvtrPacket->getroads().end()||RouteInterface::getRoadID().length()==3)
+                 {
+                     if(rbvtrPacket->getcurrentroad()!=getRoadID())
+                     {
+                         std::vector<std::string> passroad=rbvtrPacket->passedroads;
+                         if(std::find(passroad.begin(),passroad.end(),rbvtrPacket->getcurrentroad())==passroad.end())
+                          {
+                              rbvtrPacket->passedroads.push_back(rbvtrPacket->getcurrentroad());
+                          }
+                         rbvtrPacket->setcurrentroad(getRoadID());
+                     }
+                 }
                  BroadcastRTS(rbvtrPacket);
                  delayPacketlist.addPacket(destination,datagram);
                  return QUEUE;
@@ -1010,7 +1068,7 @@ RBVTRPacket * RBVTR::createDataPacket(IPvXAddress destination, cPacket * content
 
 void RBVTR::sendDataPacket(const IPvXAddress& target,std::vector<std::string> roads)
 {
-    sendDataPacket(target,roads,IPv4Address::UNSPECIFIED_ADDRESS);
+    sendDataPacket(target,roads,IPv4Address::UNSPECIFIED_ADDRESS,RBVTR_RD);
     std::multimap<IPvXAddress, IPv4Datagram *>::iterator lt = tempdelayPacketlist.getlowerbound(target);
     std::multimap<IPvXAddress, IPv4Datagram *>::iterator ut = tempdelayPacketlist.getupperbound(target);
     for (std::multimap<IPvXAddress, IPv4Datagram *>::iterator it = lt; it != ut; it++) {
@@ -1019,7 +1077,7 @@ void RBVTR::sendDataPacket(const IPvXAddress& target,std::vector<std::string> ro
     }
     tempdelayPacketlist.removePacket(target);
 }
-void RBVTR::sendDataPacket(const IPvXAddress& target,std::vector<std::string> roads,const IPvXAddress nexthop)
+void RBVTR::sendDataPacket(const IPvXAddress& target,std::vector<std::string> roads,const IPvXAddress nexthop,RBVTRPacketType packettype)
 {
     EV_LOG("sendDataPacket with nexthop: "+std::string(nexthop.str()));
     RBVTR_EV << "Completing route discovery, originator " << getSelfIPAddress() << ", target " << target <<", nexthop: " <<nexthop<< endl;
@@ -1055,7 +1113,15 @@ void RBVTR::sendDataPacket(const IPvXAddress& target,std::vector<std::string> ro
         }else
         {
             EV_LOG("Sending queued rbvtr 2");
+            EV_LOG(TypeToString(packettype));
             rbvtrdataPacket = check_and_cast<RBVTRPacket *>((dynamic_cast<cPacket *>(datagram))->getEncapsulatedPacket());
+            EV_LOG(datagram->getName());
+            EV_LOG( TypeToString(rbvtrdataPacket->getPacketType()));
+            if(rbvtrdataPacket->getPacketType()!=packettype)
+            {
+                return;
+            }
+            //rbvtrdataPacket = check_and_cast<RBVTRPacket *>((dynamic_cast<cPacket *>(datagram))->getEncapsulatedPacket());
             rbvtrdataPacket->nexthop_ip=nexthop;
             RBVTR_EV << "Sending queued rbvtr: source " << datagram->getSrcAddress() << ", destination " << datagram->getDestAddress()<<", name: " << rbvtrdataPacket->getName()<<" nexthop: "<<rbvtrdataPacket->nexthop_ip<< endl;
         }
@@ -1110,6 +1176,7 @@ RBVTRPacket *RBVTR::createRTSPacket(RBVTRPacket *rbvtrPacket)
     EV<<"Create RTS : scr: "<<RTSPacket->getsrcAddress()<<" des: "<<RTSPacket->getdesAddress()<<endl;
     cout<<"Create RTS : scr: "<<RTSPacket->getsrcAddress()<<" des: "<<RTSPacket->getdesAddress()<<endl;
     RTSPacket->setRBVTRPacketType(RBVTR_RTS);
+    RTSPacket->setRTSRBVTRPacketType(rbvtrPacket->getPacketType());
     RTSPacket->setSeqnum(squmRTS);
     RTSPacket->setscrPosition(getSelfPosition());
     RTSPacket->setroads(rbvtrPacket->getroads());
@@ -1117,6 +1184,7 @@ RBVTRPacket *RBVTR::createRTSPacket(RBVTRPacket *rbvtrPacket)
     RTSPacket->setLifetime(lifetime);
     RTSPacket->setpassedroads(rbvtrPacket->getpassedroads());
     RTSPacket->setsenderPosition(getSelfPosition());
+    RTSPacket->setcurrentroad(rbvtrPacket->getcurrentroad());
     return RTSPacket;
 }
 RBVTRPacket *RBVTR::createREPacket(RBVTRPacket *rbvtrPacket)
@@ -1163,7 +1231,7 @@ RBVTRPacket *RBVTR::createCTSPacket(RBVTRPacket *rbvtrPacket)
     CTSPacket->setdesPosition(rbvtrPacket->getdesPosition());
     EV<<"Create CTS : scr: "<<CTSPacket->getsrcAddress()<<" des: "<<CTSPacket->getdesAddress()<<endl;
     CTSPacket->setsenderPosition(rbvtrPacket->getsenderPosition());
-
+    CTSPacket->setRTSRBVTRPacketType(rbvtrPacket->getRTSPacketType());
     CTSPacket->setRBVTRPacketType(RBVTR_CTS);
     CTSPacket->setSeqnum(rbvtrPacket->getSeqnum());
     CTSPacket->setscrPosition(rbvtrPacket->getscrPosition());
@@ -1186,10 +1254,31 @@ RBVTRPacket *RBVTR::createRUPacket(IPvXAddress destination,  std::vector<std::st
     rBVTRPacket->setroads(roads);
     rBVTRPacket->setLifetime(simTime()+RUliftime);
     rBVTRPacket->setBitLength(rBVTRPacket->getPacketlength());
+    rBVTRPacket->setcurrentroad(getRoadID());
    // rBVTRPacket->encapsulate(content);
     return rBVTRPacket;
 }
 void RBVTR::EV_LOG(std::string context)
 {
     RouteInterface::EV_LOG("RBVTR",context);
+}
+std::string RBVTR::TypeToString(RBVTRPacketType type)
+{
+    switch(type)
+       {
+        case RBVTR_RD:
+            return "RBVTR_RD";
+        case RBVTR_RR:
+            return "RBVTR_RR";
+        case RBVTR_RE:
+            return "RBVTR_RE";
+        case RBVTR_RTS:
+            return "RBVTR_RTS";
+        case RBVTR_CTS:
+            return "RBVTR_CTS";
+        case RBVTR_RU:
+                 return "RBVTR_RU";
+        default :
+            return "NULL";
+       }
 }
