@@ -47,7 +47,7 @@ simple RBVTR
     	double a2 =default(0.5);
     	double a3 =default(0.03);
     	int section =default(1);
-    	int maxRebroadcastTime=default(10);
+    	int maxREtimes=default(10);
     gates:
         input ipIn;
         output ipOut;

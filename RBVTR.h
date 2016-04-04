@@ -46,7 +46,7 @@ protected:
     double Tmax;
     double dopt;
     double dmax;
-    int maxRebroadcastTime;
+    int maxREtimes;
     double a1;
     double a2;
     double a3;
@@ -58,7 +58,7 @@ protected:
     SeenTable DATASeenlist;
 
     std::vector<string> RSTSeenlist;
-    std::queue<std::pair<IPvXAddress ,simtime_t>  >  Queuedeslist;
+    std::map<IPvXAddress ,int>     RElist;
 
     RoadTable routingRoad;
      RTSPacketTable RTSlist;
@@ -100,13 +100,12 @@ protected:
     double  gaussrand(double o);
     std::string getRoadID();
 
-    void  scheduleReBroadcastRDTimer(simtime_t holdingtime,RBVTRPacket *rbvtrPacket,IPv4Datagram * datagram);
-    void scheduleRErunoutTimer(simtime_t holdingtime);
+    void  scheduleReBroadcastTimer(simtime_t holdingtime,RBVTRPacket *rbvtrPacket,IPv4Datagram * datagram);
 
     //typedef std::map<cMessage *,IPvXAddress> AddressToSqum;
     PacketWaitingTable packetwaitinglist;
    // std::vector< > reBoardcastRDTimerlist ;
-    void  processRDTimer(cMessage * message,RBVTRPacket *rbvtrPacket,const IPv4Datagram * pakcet);
+    void  processSendTimer(cMessage * message,RBVTRPacket *rbvtrPacket,const IPv4Datagram * pakcet);
 
     void  clearMessage(cMessage * message,RBVTRPacket *rbvtrPacket);
     void sendDataPacket(const IPvXAddress& target,std::vector<std::string> roads,const IPvXAddress nexthop,RBVTRPacketType packettype);
