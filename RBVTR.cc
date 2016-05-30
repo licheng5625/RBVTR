@@ -256,8 +256,8 @@ void RBVTR::processSendTimer(cMessage * message,RBVTRPacket *rbvtrPacket,const I
     EV_LOG( "processSendTimer" );
     if(rbvtrPacket->getPacketType()!=RBVTR_DATA)
     {
-       if(std::string(rbvtrPacket->getName()).find("RU")==std::string::npos)
-                LOG_EV<<"I reBroadcast RTS: "<<rbvtrPacket->getName()<<endl;
+       //if(std::string(rbvtrPacket->getName()).find("RU")==std::string::npos)
+         //       LOG_EV<<"I reBroadcast RTS: "<<rbvtrPacket->getName()<<endl;
        //BroadcastRTS(rbvtrPacket);
        MulticastRIPacket(rbvtrPacket);
 
@@ -286,7 +286,7 @@ void RBVTR::BroadcastRTS(RBVTRPacket * rbvtrPacket)
    EV_LOG("broadcast RTS");
    if(std::string(RTSPacket->getName()).find("RU")==std::string::npos)
    {
-   LOG_EV<<"BroadcastRTS : "<<RTSPacket->getName()<<" at "<<getRoadID()<<endl;
+       LOG_EV<<"BroadcastRTS : "<<RTSPacket->getName()<<" at "<<getRoadID()<<endl;
    }
    //RBVTRPacket *RTSPacketcopy=createRTSPacket(RTSPacket);
    MulticastRIPacket(RTSPacket);
@@ -421,7 +421,7 @@ void RBVTR::processRDPACKET(RBVTRPacket * rbvtrPacket)
          {
              //forwarding RD packet
              //if I didn't see the RD before
-             if((!RDSeenlist.isSeenPacket(rbvtrPacket->getsrcAddress(),rbvtrPacket->getSeqnum())))
+             if((!RDSeenlist.isSeenPacket(rbvtrPacket->getsrcAddress(),rbvtrPacket->getSeqnum()))&&rbvtrPacket->getLifetime()>=simTime())
              {
                  //LOG_EV<<" got a RD from :"<<globalPositionTable.getHostName(rbvtrPacket->nexthop_ip)<<endl;
                  RBVTR_EV<<"no seen RDpacket IP:"<<rbvtrPacket->getsrcAddress()<<"  SQUM: "<<rbvtrPacket->getSeqnum()<<" last road: "<<rbvtrPacket->getroads().back()<<" my road: "<<getRoadID()<<endl;
@@ -701,7 +701,7 @@ void RBVTR::processRTSPACKET(RBVTRPacket * rbvtrPacket)
 
 void RBVTR::processCTSPACKET(RBVTRPacket * rbvtrPacket)
 {
-    EV_LOG("Process CTS: "+std::string(rbvtrPacket->getName())+" des: "+globalPositionTable.getHostName(rbvtrPacket->getdesAddress()));
+    EV_LOG("Process CTS: "+std::string(rbvtrPacket->getName())+" des: "+globalPositionTable.getHostName(rbvtrPacket->getdesAddress())+"type is "+TypeToString(rbvtrPacket->getRTSPacketType()));
 
     if(rbvtrPacket->getdesAddress()!=getSelfIPAddress())
       {
@@ -1089,9 +1089,20 @@ void RBVTR::sendDataPacket(const IPvXAddress& target,std::vector<std::string> ro
     std::multimap<IPvXAddress, IPv4Datagram *>::iterator lt = delayPacketlist.getlowerbound(target);
     std::multimap<IPvXAddress, IPv4Datagram *>::iterator ut = delayPacketlist.getupperbound(target);
     RBVTRPacket * rbvtrdataPacket;
+    int i=0;
+
+    for (std::multimap<IPvXAddress, IPv4Datagram *>::iterator it = lt; it != ut; it++) {
+        i++;
+    }
+    cout<<"has packet : "<<i<<endl;
+    vector<string> deletenames;
+
     // reinject the delayed datagrams
     for (std::multimap<IPvXAddress, IPv4Datagram *>::iterator it = lt; it != ut; it++) {
+
         IPv4Datagram *datagram = it->second;
+        cout<<"send packet for: "<<it->first<<endl;
+        cout<<"send packet for: "<<datagram->getName()<<endl;
         if(!dynamic_cast<RBVTRPacket *>((dynamic_cast<cPacket *>(datagram))->getEncapsulatedPacket()))
         {
             if (!dynamic_cast<RBVTRPacket *>( (dynamic_cast<UDPPacket *>((dynamic_cast<cPacket *>(datagram))->getEncapsulatedPacket()))->getEncapsulatedPacket()))
@@ -1105,7 +1116,8 @@ void RBVTR::sendDataPacket(const IPvXAddress& target,std::vector<std::string> ro
              rbvtrdataPacket->setnexthopAddress(nexthop);
              networkPacket->encapsulate(rbvtrdataPacket);
              BroadcastRTS(rbvtrdataPacket);
-             return;
+             sleep(0.001);
+             continue;
             }else
             {
                 EV_LOG("Sending queued rbvtr ");
@@ -1117,13 +1129,13 @@ void RBVTR::sendDataPacket(const IPvXAddress& target,std::vector<std::string> ro
         }else
         {
             EV_LOG("Sending queued rbvtr 2");
-            EV_LOG(TypeToString(packettype));
+            EV_LOG("check for type: " + TypeToString(packettype));
             rbvtrdataPacket = check_and_cast<RBVTRPacket *>((dynamic_cast<cPacket *>(datagram))->getEncapsulatedPacket());
-            EV_LOG(datagram->getName());
-            EV_LOG( TypeToString(rbvtrdataPacket->getPacketType()));
+            EV_LOG("Packetname: "+ string(datagram->getName()));
+            EV_LOG( "sending packekt type: " + TypeToString(rbvtrdataPacket->getPacketType()));
             if(rbvtrdataPacket->getPacketType()!=packettype)
             {
-                return;
+                continue;
             }
             //rbvtrdataPacket = check_and_cast<RBVTRPacket *>((dynamic_cast<cPacket *>(datagram))->getEncapsulatedPacket());
             rbvtrdataPacket->nexthop_ip=nexthop;
@@ -1131,8 +1143,14 @@ void RBVTR::sendDataPacket(const IPvXAddress& target,std::vector<std::string> ro
         }
          // DATASeenlist.SeePacket(rbvtrdataPacket->getsrcAddress(), rbvtrdataPacket->getSeqnum());
          networkProtocol->reinjectQueuedDatagram( const_cast<const IPv4Datagram *>(datagram));
+         cout<< "delete packekt for "<< target <<"name "<<datagram->getName()<<endl;
+         deletenames.push_back(datagram->getName());
      }
-    delayPacketlist.removePacket(target);
+    for(int i=0;i<deletenames.size();i++)
+    {
+        delayPacketlist.removePacket(target,deletenames[i]) ;
+    }
+    //delayPacketlist.removePacket(target);
 }
 
 RBVTRPacket *RBVTR::createRRPacket(RBVTRPacket *rbvtrPacket)
@@ -1282,6 +1300,8 @@ std::string RBVTR::TypeToString(RBVTRPacketType type)
             return "RBVTR_CTS";
         case RBVTR_RU:
                  return "RBVTR_RU";
+        case RBVTR_DATA:
+                return "RBVTR_DATA";
         default :
             return "NULL";
        }
