@@ -80,12 +80,12 @@ std::string RBVTR::getRoadID()
     }
 }
 
-simtime_t RBVTR::CaculateHoldTime(Coord srcPosition)
+simtime_t RBVTR::CalculateHoldTime(Coord srcPosition)
 {
     //return 1/(srcPosition - getSelfPosition()).length()*2;
     return 1/(srcPosition - getSelfPosition()).length();
 }
-simtime_t RBVTR::CaculateHoldTime(Coord srcPosition,Coord desPosition)
+simtime_t RBVTR::CalculateHoldTime(Coord srcPosition,Coord desPosition)
 {
     double distence=0;
      if (desPosition==Coord(0,0,0))
@@ -99,10 +99,10 @@ simtime_t RBVTR::CaculateHoldTime(Coord srcPosition,Coord desPosition)
             distence=dmax;
         inFile<<" with distence £º"<<distence;
      }
-    //double parmax=(pow(dmax,a1)*pow(CaculateF(dopt),a2)*pow(0.000000001,a3));
-    double parmax=(pow(dmax,a1)*pow(CaculateF(dopt),a2)*pow(0.2,a3));
+    //double parmax=(pow(dmax,a1)*pow(CalculateF(dopt),a2)*pow(0.000000001,a3));
+    double parmax=(pow(dmax,a1)*pow(CalculateF(dopt),a2)*pow(0.2,a3));
     double A=-Tmax/parmax;
-    double f=CaculateF(distence);
+    double f=CalculateF(distence);
     double p=recPow;
     RBVTR_EV<<"A  "<<A<<endl;
     double ss= pow(distence,a1)*pow(f,a2)*pow(p,a3);
@@ -114,7 +114,7 @@ simtime_t RBVTR::CaculateHoldTime(Coord srcPosition,Coord desPosition)
     inFile<<" with waiting time "<<result<<endl;
      return result;
  }
-double  RBVTR::CaculateF(double distence)
+double  RBVTR::CalculateF(double distence)
 {
     double dtrans=dmax-dopt;
     RBVTR_EV<<" distence "<<distence<<endl;
@@ -129,7 +129,7 @@ double  RBVTR::CaculateF(double distence)
        return dmax- distence;
    }
 }
-double  RBVTR::CaculateP(double distence)
+double  RBVTR::CalculateP(double distence)
 {
     double B=3.25;
     double d0=100;
@@ -345,11 +345,11 @@ void RBVTR::processRDPACKET(RBVTRPacket * rbvtrPacket)
               {
                  for(int i=0;i<roads.size()-1;i++)
                  {
-                      std::string intersection =getRoadIntersection(roads[i],roads[i+1]);
+                      std::string intersection =getConnectingJunctionBetweenTwoRoads(roads[i],roads[i+1]);
                       //if there is no connectin like  1/2to1/3 and 1/4to1/5
                       if(intersection==std::string("none"))
                       {
-                        std::string newroad=  caculateConnection(roads[i],roads[i+1]);
+                        std::string newroad=  getConnectingRoadBetweenTwoRoads(roads[i],roads[i+1]);
                         //if they are missing more than 1 road , now i have no idea how to caculate so just return
                         if(newroad==std::string("none"))
                             return;
@@ -382,7 +382,7 @@ void RBVTR::processRDPACKET(RBVTRPacket * rbvtrPacket)
                  {
                      for(int j=i-2;j<i-1;j++)
                       {
-                         if(getRoadIntersection(roads[j],roads[i])!=std::string("none"))
+                         if(getConnectingJunctionBetweenTwoRoads(roads[j],roads[i])!=std::string("none"))
                               {
                               //LOG_EV<<"del "<<roads[i]<<" "<<roads[j]<<" the intersection  "<<temproad[temproad.size()-1]<<endl;
                               temproad[temproad.size()-1]=roads[i];
@@ -451,7 +451,7 @@ void RBVTR::processRDPACKET(RBVTRPacket * rbvtrPacket)
                      //             1/3to1/4
                      //             1/3to2/1 my roadID
                      //delete 1/3to 1/4  and add mein
-                     if(routingroads.size()>=2&&hasIntersection(getRoadID(),getRoadIntersection(routingroads[routingroads.size()-2],routingroads[routingroads.size()-1])))
+                     if(routingroads.size()>=2&&hasJunction(getRoadID(),getConnectingJunctionBetweenTwoRoads(routingroads[routingroads.size()-2],routingroads[routingroads.size()-1])))
                      {
                          EV_LOG("Delete intersection");
                          rbvtrPacket->getroads()[routingroads.size()-1]=getRoadID();
@@ -469,7 +469,7 @@ void RBVTR::processRDPACKET(RBVTRPacket * rbvtrPacket)
                }
                rbvtrPacket->nexthop_ip=getSelfIPAddress();
                // caculate the holding time and wait for sending it
-               scheduleReBroadcastTimer(CaculateHoldTime(rbvtrPacket->getsenderPosition()),rbvtrPacket,NULL);
+               scheduleReBroadcastTimer(CalculateHoldTime(rbvtrPacket->getsenderPosition()),rbvtrPacket,NULL);
                rbvtrPacket->setsenderPosition(getSelfPosition());
                RDSeenlist.SeePacket(rbvtrPacket->getsrcAddress(), rbvtrPacket->getSeqnum());
              }
@@ -582,7 +582,7 @@ void RBVTR::processRUPACKET(RBVTRPacket * rbvtrPacket)
               if(!RUSeenlist.isSeenPacket(rbvtrPacket->getsrcAddress(),rbvtrPacket->getSeqnum()))
                   {
                   RBVTR_EV<<"no seen RUpacket IP:"<<rbvtrPacket->getsrcAddress()<<"  SQUM: "<<rbvtrPacket->getSeqnum()<<endl;
-                   scheduleReBroadcastTimer(CaculateHoldTime(rbvtrPacket->getsenderPosition(),rbvtrPacket->getdesPosition()),rbvtrPacket,NULL);
+                   scheduleReBroadcastTimer(CalculateHoldTime(rbvtrPacket->getsenderPosition(),rbvtrPacket->getdesPosition()),rbvtrPacket,NULL);
                    rbvtrPacket->setsenderPosition(getSelfPosition());
                    RUSeenlist.SeePacket(rbvtrPacket->getsrcAddress(), rbvtrPacket->getSeqnum());
                    }
@@ -635,7 +635,7 @@ void RBVTR::processRTSPACKET(RBVTRPacket * rbvtrPacket)
                 LOG_EV<<"i got Rts from "<<globalPositionTable.getHostName(rbvtrPacket->getsrcAddress())<<" in the road: "<<getRoadID();
                 RBVTR_EV<<"got RTS IP:"<<rbvtrPacket->getsrcAddress()<<"  SQUM: "<<rbvtrPacket->getSeqnum()<<endl;
                 RBVTRPacket *ctspacket=  createCTSPacket( rbvtrPacket);
-                scheduleReBroadcastTimer(CaculateHoldTime(ctspacket->getscrPosition(),ctspacket->getdesPosition()),ctspacket,NULL);
+                scheduleReBroadcastTimer(CalculateHoldTime(ctspacket->getscrPosition(),ctspacket->getdesPosition()),ctspacket,NULL);
               }else
               {
                   LOG_EV<<"i drop Rts from "<<globalPositionTable.getHostName(rbvtrPacket->getsrcAddress())<<" in the passed road"<<endl;
@@ -663,15 +663,15 @@ void RBVTR::processRTSPACKET(RBVTRPacket * rbvtrPacket)
               if(std::find(RSTSeenlist.begin(),RSTSeenlist.end(),(name))==RSTSeenlist.end())
               {
                   //if i am in the intersection RouteInterface::getRoadID().length()==3
-              if(RouteInterface::getRoadID().length()==3&&hasIntersection(rbvtrPacket->getcurrentroad(),RouteInterface::getRoadID())&&section>0)
+              if(RouteInterface::getRoadID().length()==3&&hasJunction(rbvtrPacket->getcurrentroad(),RouteInterface::getRoadID())&&section>0)
               {
                       LOG_EV<<"i got Rts from "<<globalPositionTable.getHostName(rbvtrPacket->getsrcAddress())<<" my road: "<<RouteInterface::getRoadID()<<endl;
                       RBVTRPacket *ctspacket=  createCTSPacket( rbvtrPacket);
-                      scheduleReBroadcastTimer(CaculateHoldTime(ctspacket->getsenderPosition(),ctspacket->getdesPosition()),ctspacket,NULL);
+                      scheduleReBroadcastTimer(CalculateHoldTime(ctspacket->getsenderPosition(),ctspacket->getdesPosition()),ctspacket,NULL);
                       return;
                       }
                       // if i am in the road with same intersecion of passing road
-                      if(getRoadIntersection(getRoadID(),rbvtrPacket->getcurrentroad())!="none"&&section>1)
+                      if(getConnectingJunctionBetweenTwoRoads(getRoadID(),rbvtrPacket->getcurrentroad())!="none"&&section>1)
                           {
                            LOG_EV<<"i got Rts from "<<globalPositionTable.getHostName(rbvtrPacket->getsrcAddress())<<" in other road: "<<RouteInterface::getRoadID()<<endl;
                            RBVTRPacket *ctspacket=  createCTSPacket( rbvtrPacket);
@@ -685,7 +685,7 @@ void RBVTR::processRTSPACKET(RBVTRPacket * rbvtrPacket)
                           for(int i=0;i<routingroad.size()-1;i++)
                               {
                                   RBVTR_EV<<"roadlist: "<<routingroad[i]<<endl;
-                                  //std::string intersection =getRoadIntersection(roads[i],roads[i+1]);
+                                  //std::string intersection =getConnectingJunctionBetweenTwoRoads(roads[i],roads[i+1]);
                                   if(isRoadVertical(routingroad[i],routingroad[i+1]))
                                   {
                                       std::string aimroad;
@@ -696,7 +696,7 @@ void RBVTR::processRTSPACKET(RBVTRPacket * rbvtrPacket)
                                       {
                                           aimroad=routingroad[i+1];
                                       }
-                                      if(!isRoadVertical(aimroad,getRoadID())&&getRoadIntersection(aimroad,getRoadID())!=std::string("none"))
+                                      if(!isRoadVertical(aimroad,getRoadID())&&getConnectingJunctionBetweenTwoRoads(aimroad,getRoadID())!=std::string("none"))
                                       {
                                           LOG_EV<<"i got Rts from "<<globalPositionTable.getHostName(rbvtrPacket->getsrcAddress())<<" with distence : "<<distence<<" my road: "<<RouteInterface::getRoadID()<<endl;
                                           RBVTRPacket *ctspacket=  createCTSPacket( rbvtrPacket);

@@ -92,11 +92,11 @@ protected:
      void  BroadcastRTS(RBVTRPacket * rbvtrPacket);
 
    // void  handleMessage(cMessage *message);
-    simtime_t  CaculateHoldTime(Coord srcPosition,Coord desPosition);
-    simtime_t CaculateHoldTime(Coord srcPosition);
+    simtime_t  CalculateHoldTime(Coord srcPosition,Coord desPosition);
+    simtime_t CalculateHoldTime(Coord srcPosition);
 
-    double   CaculateF(double distence);
-    double   CaculateP(double distence);
+    double   CalculateF(double distence);
+    double   CalculateP(double distence);
     double  gaussrand(double o);
     std::string getRoadID();
 
