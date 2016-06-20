@@ -73,7 +73,7 @@ std::string RBVTR::getRoadID()
     string myroad =RouteInterface::getRoadID();
     if(myroad.length()!=8) //if the car in the intersection get the roadID before the car go into the intersection
     {
-        return oldroadID;
+        return myroad+"to"+myroad;
     }else
     {
         return myroad;
@@ -443,25 +443,27 @@ void RBVTR::processRDPACKET(RBVTRPacket * rbvtrPacket)
                  {
                      EV_LOG("road in packet: "+routingroads[i]);
                  }
-                 // add my road to the road list
-                 if(routingroads.size()==0||routingroads.back()!=getRoadID())
-                 {
-                     //check the if i am the shorter path like
-                     //for example 1/2to1/3
-                     //             1/3to1/4
-                     //             1/3to2/1 my roadID
-                     //delete 1/3to 1/4  and add mein
-                     if(routingroads.size()>=2&&hasJunction(getRoadID(),getConnectingJunctionBetweenTwoRoads(routingroads[routingroads.size()-2],routingroads[routingroads.size()-1])))
+                 if (!isLocalateInIntersection()){
+                     // add my road to the road list
+                     if(routingroads.size()==0||routingroads.back()!=getRoadID())
                      {
-                         EV_LOG("Delete intersection");
-                         rbvtrPacket->getroads()[routingroads.size()-1]=getRoadID();
-                     }else
-                     {
-                         EV_LOG("add intersection "+getRoadID());
-                         rbvtrPacket->addroad(getRoadID());
+                         //check the if i am the shorter path like
+                         //for example 1/2to1/3
+                         //             1/3to1/4
+                         //             1/3to2/1 my roadID
+                         //delete 1/3to 1/4  and add mein
+                         if(routingroads.size()>=2&&hasJunction(getRoadID(),getConnectingJunctionBetweenTwoRoads(routingroads[routingroads.size()-2],routingroads[routingroads.size()-1])))
+                         {
+                             EV_LOG("Delete intersection");
+                             rbvtrPacket->getroads()[routingroads.size()-1]=getRoadID();
+                         }else
+                         {
+                             EV_LOG("add intersection "+getRoadID());
+                             rbvtrPacket->addroad(getRoadID());
+                         }
                      }
                  }
-                 EV_LOG("My road is:  "+getRoadID());
+               EV_LOG("My road is:  "+getRoadID());
                routingroads=rbvtrPacket->getroads();
                for (int i=0 ;i<routingroads.size();i++)
                {
