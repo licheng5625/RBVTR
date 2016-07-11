@@ -34,6 +34,7 @@ protected:
 
     double HoldingIndex ;
     int  section;
+    bool checkRD;
     simtime_t RDliftime;
     simtime_t RRliftime;
     simtime_t RUliftime;

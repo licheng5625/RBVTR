@@ -37,7 +37,7 @@ simple RBVTR
 		double RDliftime @unit("s") = default(20s); 
 	    double RUliftime @unit("s") = default(20s); 
 		double RRliftime @unit("s") = default(20s); 
-		double REwaittime @unit("s") = default(2s); 
+		double REwaittime @unit("s") = default(0.5s); 
 		double DATAliftime @unit("s") = default(20s); 
 		double nextRUtimer @unit("s") = default(0.02s); 
 		double Tmax  @unit("s") = default(0.1s);
@@ -47,7 +47,8 @@ simple RBVTR
     	double a2 =default(0.5);
     	double a3 =default(0.03);
     	int section =default(1);
-    	int maxREtimes=default(10);
+    	int maxREtimes=default(1);
+    	bool checkRD=default(true);
     gates:
         input ipIn;
         output ipOut;

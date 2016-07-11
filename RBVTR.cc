@@ -37,8 +37,9 @@ void RBVTR::initialize( int stage){
         squmDATA=0;
         squmRTS=0;
         squmRE=0;
+        checkRD = par("checkRD");
         section = par("section");
-        RDliftime= par("RDliftime");
+        RDliftime= par("Rliftime");
         RRliftime= par("RRliftime");
         DATAliftime= par("DATAliftime");
         REwaittime= par("REwaittime");
@@ -97,7 +98,7 @@ simtime_t RBVTR::CalculateHoldTime(Coord srcPosition,Coord desPosition)
         distence = (srcPosition-desPosition).length()-(desPosition - getSelfPosition()).length();
          if(distence<0)              //if the node is farther than me so i just consider it locals the farthest distence
             distence=dmax;
-        inFile<<" with distence £º"<<distence;
+        inFile<<"des pos: "<<desPosition<<" my pos: "<<getSelfPosition()<<" with distence: "<<distence;
      }
     //double parmax=(pow(dmax,a1)*pow(CalculateF(dopt),a2)*pow(0.000000001,a3));
     double parmax=(pow(dmax,a1)*pow(CalculateF(dopt),a2)*pow(0.2,a3));
@@ -409,12 +410,12 @@ void RBVTR::processRDPACKET(RBVTRPacket * rbvtrPacket)
                }
 
               //if the new roadlist is shorter than old road then I updata the road list local and reply RR packet
-              LOG_EV<<"add road position "<<rbvtrPacket->getsrcAddress().get4()<<"  "<<rbvtrPacket->getscrPosition()<<endl;
-
-             if(routingRoad.addRoadTable(rbvtrPacket->getsrcAddress().get4(),routingroad,rbvtrPacket->getscrPosition()))
+            //  LOG_EV<<"add road position "<<rbvtrPacket->getsrcAddress().get4()<<"  "<<rbvtrPacket->getscrPosition()<<endl;
+             bool hasSeenBefore =!RDSeenlist.isSeenPacket(rbvtrPacket->getsrcAddress(),rbvtrPacket->getSeqnum())&&checkRD;
+             if(routingRoad.addRoadTable(rbvtrPacket->getsrcAddress().get4(),routingroad,rbvtrPacket->getscrPosition())||hasSeenBefore)
              {
              //reply RR
-                 LOG_EV<<"this RD for me and reply RR"<<endl;
+                 LOG_EV<<"this RD for me and reply RR src:"<<rbvtrPacket->getsrcAddress()<<" sum: "<<rbvtrPacket->getSeqnum()<<endl;
                   RBVTRPacket *RrPacket=createRRPacket(  rbvtrPacket);
                   //RBVTR_EV << "Add raod in table :"<<rbvtrPacket->getsrcAddress()<<endl;
                   //std::cout<< "Add raod in table :"<<rbvtrPacket->getsrcAddress()<<endl;
@@ -422,7 +423,7 @@ void RBVTR::processRDPACKET(RBVTRPacket * rbvtrPacket)
                       {
                           RBVTR_EV<<"roadlist: "<<rbvtrPacket->getroads()[i]<<endl;
                           std::cout<<"roadlist: "<<rbvtrPacket->getroads()[i]<<endl;
-                          LOG_EV<<"roadlist: "<<rbvtrPacket->getroads()[i]<<endl;
+                         // LOG_EV<<"roadlist: "<<rbvtrPacket->getroads()[i]<<endl;
                       }
                  sendRIPacket(RrPacket,RrPacket->getdesAddress(),255,0);
              }
@@ -443,27 +444,60 @@ void RBVTR::processRDPACKET(RBVTRPacket * rbvtrPacket)
                  {
                      EV_LOG("road in packet: "+routingroads[i]);
                  }
-                 if (!isLocalateInIntersection()){
-                     // add my road to the road list
-                     if(routingroads.size()==0||routingroads.back()!=getRoadID())
+                 string addroad=getRoadID();
+                 if (isLocalateInIntersection()){
+                     for(int i=0;i<rbvtrPacket->getroads().size();i++)
+                       {
+                           // LOG_EV<<"old roadlist: "<<rbvtrPacket->getroads()[i]<<endl;
+                            RBVTR_EV<<"old roadlist: "<<rbvtrPacket->getroads()[i]<<endl;
+
+                        }
+                     if(hasJunction(routingroads.back(),RouteInterface::getRoadID()))
                      {
-                         //check the if i am the shorter path like
-                         //for example 1/2to1/3
-                         //             1/3to1/4
-                         //             1/3to2/1 my roadID
-                         //delete 1/3to 1/4  and add mein
-                         if(routingroads.size()>=2&&hasJunction(getRoadID(),getConnectingJunctionBetweenTwoRoads(routingroads[routingroads.size()-2],routingroads[routingroads.size()-1])))
+                         addroad=routingroads.back();
+                     }else
+                     {
+                         std::vector<std::string> roadlistofjunction= getRoadsOfJunction(RouteInterface::getRoadID()) ;
+                         bool hasintersection = false;
+                         for(int i=0;i<4;i++)
                          {
-                             EV_LOG("Delete intersection");
-                             rbvtrPacket->getroads()[routingroads.size()-1]=getRoadID();
-                         }else
+                             if(getConnectingJunctionBetweenTwoRoads(roadlistofjunction[i],routingroads.back())!="none")
+                             {
+                                 addroad=roadlistofjunction[i];
+                                 hasintersection=true;
+                                 break;
+                             }
+                         }
+                         if(!hasintersection)
                          {
-                             EV_LOG("add intersection "+getRoadID());
-                             rbvtrPacket->addroad(getRoadID());
+                             RDSeenlist.removeSeenPacket(rbvtrPacket->getsrcAddress());
+                             return;
                          }
                      }
+                    // LOG_EV<<"add road: "<<addroad<<endl;
+                     RBVTR_EV<<"add road: "<<addroad<<endl;
                  }
-               EV_LOG("My road is:  "+getRoadID());
+                     // add my road to the road list
+                 if(routingroads.size()==0||routingroads.back()!=addroad)
+                 {
+                     //check the if i am the shorter path like
+                     //for example 1/2to1/3
+                     //             1/3to1/4
+                     //             1/3to2/1 my roadID
+                     //delete 1/3to 1/4  and add mein
+                     if(routingroads.size()>=2&&hasJunction(addroad,getConnectingJunctionBetweenTwoRoads(routingroads[routingroads.size()-2],routingroads[routingroads.size()-1])))
+                     {
+                         EV_LOG("Delete intersection");
+                         rbvtrPacket->getroads()[routingroads.size()-1]=addroad;
+                     }else
+                     {
+                         EV_LOG("add intersection "+addroad);
+                         rbvtrPacket->addroad(addroad);
+                     }
+                 }
+
+
+               EV_LOG("My road is:  "+getRoadID()+" add road:  "+addroad);
                routingroads=rbvtrPacket->getroads();
                for (int i=0 ;i<routingroads.size();i++)
                {
@@ -478,7 +512,7 @@ void RBVTR::processRDPACKET(RBVTRPacket * rbvtrPacket)
              else
              {
                  //if I have seen this RD before then i check the packets waiting list , if there is a same RD packet waiting for sending so cancel it
-                 if(rbvtrPacket->getroads().back()!=getRoadID())//std::find(rbvtrPacket->getroads().begin(),rbvtrPacket->getroads().end(),getRoadID())==rbvtrPacket->getroads().end())
+                 if(rbvtrPacket->getroads().back()!=getRoadID()||isLocalateInIntersection())//std::find(rbvtrPacket->getroads().begin(),rbvtrPacket->getroads().end(),getRoadID())==rbvtrPacket->getroads().end())
                  {
                     // LOG_EV<<" drop a RD from :"<<globalPositionTable.getHostName(rbvtrPacket->nexthop_ip)<<endl;
                      RBVTR_EV<<"seen a RDpacket IP:"<<rbvtrPacket->getsrcAddress()<<"  SQUM: "<<rbvtrPacket->getSeqnum()<<endl;
@@ -505,8 +539,10 @@ void RBVTR::processREPACKET(RBVTRPacket * rbvtrPacket)
                 map<IPvXAddress, int>::iterator iter = RElist.find(rbvtrPacket->getsrcAddress());
                 if (iter != RElist.end())
                 {
+                    RElist[rbvtrPacket->getsrcAddress()]=1;
+                }
                     //make the counter +1
-                    if(iter->second>maxREtimes)
+               if(iter->second>=maxREtimes)
                     {
                         routingRoad.removeRoadTable(rbvtrPacket->getsrcAddress().get4());
                         iter->second=0;
@@ -514,10 +550,9 @@ void RBVTR::processREPACKET(RBVTRPacket * rbvtrPacket)
                     {
                         iter->second=iter->second+1;
                     }
-                }else
-                {
-                    RElist[rbvtrPacket->getsrcAddress()]=0;
-                }
+
+
+
                 //counter reachs the max Error times then delete the road list of the des, next packet will send RD
 
            }
@@ -539,10 +574,11 @@ void RBVTR::processRRPACKET(RBVTRPacket * rbvtrPacket)
             LOG_EV<<"i got RR from "<<globalPositionTable.getHostName(rbvtrPacket->getsrcAddress())<<endl;
             //RBVTR_EV <<(rbvtrPacket->getdesAddress())<<"           "<<getSelfIPAddress()<<endl;
           //if this RR packet is new or has shorter path
-            LOG_EV<<"add road position "<<rbvtrPacket->getsrcAddress().get4()<<"  "<<rbvtrPacket->getscrPosition()<<endl;
 
             if(routingRoad.addRoadTable(rbvtrPacket->getsrcAddress().get4(),rbvtrPacket->getroads(),rbvtrPacket->getscrPosition()))
             {
+                LOG_EV<<"add road position "<<rbvtrPacket->getsrcAddress().get4()<<"  "<<rbvtrPacket->getscrPosition()<<endl;
+
                 RBVTR_EV << "Add raod in table :"<<rbvtrPacket->getsrcAddress()<<endl;
                // routingRoad.getPositionTable(rbvtrPacket->getsrcAddress().get4());
              /*   for(int i=0;i<rbvtrPacket->getroads().size();i++)
@@ -734,11 +770,16 @@ void RBVTR::processCTSPACKET(RBVTRPacket * rbvtrPacket)
         cMessage *mymsg=NULL;
         mymsg=packetwaitinglist.findPacket(rbvtrPacket->getName());
         //RSTSeenlist.push_back(name.substr(3));
+
          if(mymsg!=NULL)
          {
-          clearMessage(mymsg,rbvtrPacket);
-          RBVTR_EV<<"cancel ctspacket IP:"<<rbvtrPacket->getdesAddress()<<"  SQUM: "<<rbvtrPacket->getSeqnum()<<endl;
-          std::cout<<"cancel ctspacket IP:"<<rbvtrPacket->getdesAddress()<<"  SQUM: "<<rbvtrPacket->getSeqnum()<<endl;
+          RBVTRPacket* ctspacket =check_and_cast<RBVTRPacket *>(packetwaitinglist.getcPacket( mymsg));
+          if (ctspacket->getdesAddress()==rbvtrPacket->getdesAddress())
+          {
+              clearMessage(mymsg,rbvtrPacket);
+              RBVTR_EV<<"cancel ctspacket IP:"<<rbvtrPacket->getdesAddress()<<"  SQUM: "<<rbvtrPacket->getSeqnum()<<endl;
+              std::cout<<"cancel ctspacket IP:"<<rbvtrPacket->getdesAddress()<<"  SQUM: "<<rbvtrPacket->getSeqnum()<<endl;
+          }
          }
       }else
       {
@@ -1030,6 +1071,7 @@ INetfilter::IHook::Result RBVTR::datagramLocalOutHook(IPv4Datagram * datagram, c
                           cPacket * networkPacket = dynamic_cast<cPacket *>(datagram);
                           // RBVTRPacket * rbvtrdataPacket = createDataPacket(datagram->getDestAddress(), networkPacket->decapsulate());
                           RBVTRPacket *rbvtrPacket=createRDPacket(  destination,networkPacket->getName());
+                          LOG_EV<<"create rd "<<rbvtrPacket->getName()<<endl;
                           // networkPacket->encapsulate(rbvtrdataPacket);
                           // DATASeenlist.SeePacket(rbvtrdataPacket->getsrcAddress(), rbvtrdataPacket->getSeqnum());
                           RDSeenlist.SeePacket(rbvtrPacket->getsrcAddress(), rbvtrPacket->getSeqnum());
