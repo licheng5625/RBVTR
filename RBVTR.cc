@@ -37,9 +37,8 @@ void RBVTR::initialize( int stage){
         squmDATA=0;
         squmRTS=0;
         squmRE=0;
-        checkRD = par("checkRD");
         section = par("section");
-        RDliftime= par("Rliftime");
+        RDliftime= par("RDliftime");
         RRliftime= par("RRliftime");
         DATAliftime= par("DATAliftime");
         REwaittime= par("REwaittime");
@@ -411,7 +410,7 @@ void RBVTR::processRDPACKET(RBVTRPacket * rbvtrPacket)
 
               //if the new roadlist is shorter than old road then I updata the road list local and reply RR packet
             //  LOG_EV<<"add road position "<<rbvtrPacket->getsrcAddress().get4()<<"  "<<rbvtrPacket->getscrPosition()<<endl;
-             bool hasSeenBefore =!RDSeenlist.isSeenPacket(rbvtrPacket->getsrcAddress(),rbvtrPacket->getSeqnum())&&checkRD;
+              bool hasSeenBefore =!RDSeenlist.isSeenPacket(rbvtrPacket->getsrcAddress(),rbvtrPacket->getSeqnum());
              if(routingRoad.addRoadTable(rbvtrPacket->getsrcAddress().get4(),routingroad,rbvtrPacket->getscrPosition())||hasSeenBefore)
              {
              //reply RR
