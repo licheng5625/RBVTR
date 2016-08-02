@@ -449,7 +449,6 @@ void RBVTR::processRDPACKET(RBVTRPacket * rbvtrPacket)
                        {
                            // LOG_EV<<"old roadlist: "<<rbvtrPacket->getroads()[i]<<endl;
                             RBVTR_EV<<"old roadlist: "<<rbvtrPacket->getroads()[i]<<endl;
-
                         }
                      if(hasJunction(routingroads.back(),RouteInterface::getRoadID()))
                      {
@@ -460,7 +459,7 @@ void RBVTR::processRDPACKET(RBVTRPacket * rbvtrPacket)
                          bool hasintersection = false;
                          for(int i=0;i<4;i++)
                          {
-                             if(getConnectingJunctionBetweenTwoRoads(roadlistofjunction[i],routingroads.back())!="none")
+                           if(getConnectingJunctionBetweenTwoRoads(roadlistofjunction[i],routingroads.back())!="none")
                              {
                                  addroad=roadlistofjunction[i];
                                  hasintersection=true;
