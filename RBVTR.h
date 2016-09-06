@@ -56,12 +56,13 @@ protected:
     SeenTable RSTwatinglist;
     SeenTable RUSeenlist;
     SeenTable DATASeenlist;
+    bool usingdesposition;
 
     std::vector<string> RSTSeenlist;
     std::map<IPvXAddress ,int>     RElist;
 
     RoadTable routingRoad;
-     RTSPacketTable RTSlist;
+    RTSPacketTable RTSlist;
     IInterfaceTable *interfaceTable;
     DelayPacketTable tempdelayPacketlist;
 
@@ -84,6 +85,7 @@ protected:
 
      void  processRTSPACKET(RBVTRPacket * rbvtrPacket);
      void  processCTSPACKET(RBVTRPacket * rbvtrPacket);
+     Coord getNextHopPosition(std::vector<std::string>roadlist, std::string currentroad,Coord desposition,bool isreverse);
      void  processRDPACKET(RBVTRPacket * rbvtrPacket);
      void  processRUPACKET(RBVTRPacket * rbvtrPacket);
      void  processRRPACKET(RBVTRPacket * rbvtrPacket);

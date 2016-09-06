@@ -48,6 +48,7 @@ simple RBVTR
     	double a3 =default(0.03);
     	int section =default(1);
     	int maxREtimes=default(1);
+    	bool usingdesposition=default(true);
     gates:
         input ipIn;
         output ipOut;
