@@ -49,6 +49,8 @@ simple RBVTR
     	int section =default(1);
     	int maxREtimes=default(1);
     	bool usingdesposition=default(true);
+    	bool checkSeqOfRR=default(true);
+    	bool CarnearToDes=default(true);
     gates:
         input ipIn;
         output ipOut;

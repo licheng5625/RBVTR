@@ -57,7 +57,8 @@ protected:
     SeenTable RUSeenlist;
     SeenTable DATASeenlist;
     bool usingdesposition;
-
+    bool CarnearToDes;
+    checkSeqOfRR checkSeqOfRR;
     std::vector<string> RSTSeenlist;
     std::map<IPvXAddress ,int>     RElist;
 

@@ -45,6 +45,8 @@ void RBVTR::initialize( int stage){
         nextRUtimer= par("nextRUtimer");
         RUliftime= par("RUliftime");
         usingdesposition =par("usingdesposition");
+        CarnearToDes =par("CarnearToDes");
+        checkSeqOfRR = par("checkSeqOfRR");
         routingTable = check_and_cast<IRoutingTable *>(getModuleByPath(par("routingTableModule")));
         RUTimer = new cMessage("RUTimer");
           Tmax= par("Tmax");
@@ -411,8 +413,8 @@ void RBVTR::processRDPACKET(RBVTRPacket * rbvtrPacket)
 
               //if the new roadlist is shorter than old road then I updata the road list local and reply RR packet
             //  LOG_EV<<"add road position "<<rbvtrPacket->getsrcAddress().get4()<<"  "<<rbvtrPacket->getscrPosition()<<endl;
-              bool hasSeenBefore =!RDSeenlist.isSeenPacket(rbvtrPacket->getsrcAddress(),rbvtrPacket->getSeqnum());
-             if(routingRoad.addRoadTable(rbvtrPacket->getsrcAddress().get4(),routingroad,rbvtrPacket->getscrPosition())||hasSeenBefore)
+              bool hasSeenBefore =RDSeenlist.isSeenPacket(rbvtrPacket->getsrcAddress(),rbvtrPacket->getSeqnum());
+             if(routingRoad.addRoadTable(rbvtrPacket->getsrcAddress().get4(),routingroad,rbvtrPacket->getscrPosition())||(!hasSeenBefore&&(checkSeqOfRR)))
              {
              //reply RR
                  LOG_EV<<"this RD for me and reply RR src:"<<rbvtrPacket->getsrcAddress()<<" sum: "<<rbvtrPacket->getSeqnum()<<" at  "<<getRoadID()<<endl;
@@ -766,7 +768,7 @@ void RBVTR::processRTSPACKET(RBVTRPacket * rbvtrPacket)
                       }
 
                      double distence=(nexthopPosition - getSelfPosition()).length();
-                     if (distence<50)
+                     if (distence<50 &&CarnearToDes)
                      {
                          LOG_EV<<"i got Rts from "<<globalPositionTable.getHostName(rbvtrPacket->getsrcAddress())<<" in other road: "<<RouteInterface::getRoadID()<<endl;
                          scheduleReBroadcastTimer(CalculateHoldTime(ctspacket->getsenderPosition(),nexthopPosition),ctspacket,NULL);
